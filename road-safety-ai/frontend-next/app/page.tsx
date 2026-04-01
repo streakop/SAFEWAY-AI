@@ -16,7 +16,7 @@ type Alert = {
   time: string;
 };
 
-// 🔥 USE ENV VARIABLE
+//   USE ENV VARIABLE
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export default function Home() {
@@ -24,7 +24,7 @@ export default function Home() {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    // 🔥 INIT SOCKET ONLY ON CLIENT
+    //   INIT SOCKET ONLY ON CLIENT
     const newSocket = io(BACKEND_URL, {
       transports: ["websocket"]
     });
@@ -51,7 +51,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-slate-800 text-white p-8 relative">
 
-      {/* 🔴 LIVE INDICATOR */}
+      {/*  LIVE INDICATOR */}
       <div className="absolute top-6 right-8 flex items-center gap-2">
         <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
         <span className="text-green-400 text-sm">LIVE</span>
@@ -93,8 +93,8 @@ export default function Home() {
               } p-3 rounded-2xl shadow-lg transition hover:scale-[1.02]`}
             >
               <div className="flex justify-between items-center mb-2">
-                <p className="text-sm text-cyan-400">📷 {cam}</p>
-                <p className="text-xs text-gray-400">🚨 {camAlerts.length}</p>
+                <p className="text-sm text-cyan-400"> {cam}</p>
+                <p className="text-xs text-gray-400"> {camAlerts.length}</p>
               </div>
 
               <img
@@ -106,7 +106,7 @@ export default function Home() {
         })}
       </div>
 
-      {/* 🚨 ALERTS */}
+      {/* ALERTS */}
       <div className="space-y-4">
         {alerts.map((alert, index) => (
           <div
@@ -114,14 +114,14 @@ export default function Home() {
             className="bg-white/5 backdrop-blur-lg border border-white/10 p-4 rounded-2xl flex justify-between items-center hover:scale-[1.01] transition"
           >
             <div>
-              <p className="font-semibold text-lg">📍 {alert.location}</p>
+              <p className="font-semibold text-lg"> {alert.location}</p>
 
               <p className="text-xs text-cyan-300">
-                📷 {alert.cameraId || "cam_1"}
+                 {alert.cameraId || "cam_1"}
               </p>
 
               <p className="text-sm text-gray-400">
-                ⏱ {new Date(alert.time).toLocaleTimeString()}
+                {new Date(alert.time).toLocaleTimeString()}
               </p>
             </div>
 

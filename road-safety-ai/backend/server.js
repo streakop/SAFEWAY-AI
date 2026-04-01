@@ -7,9 +7,9 @@ const { Server } = require("socket.io");
 
 const app = express();
 
-// ======================
-// 🔥 CREATE HTTP SERVER + SOCKET.IO
-// ======================
+ 
+//   CREATE HTTP SERVER + SOCKET.IO
+ 
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -18,24 +18,24 @@ const io = new Server(server, {
     }
 });
 
-// ======================
+ 
 // MIDDLEWARE
-// ======================
+ 
 app.use(cors());
 app.use(express.json());
 
-// ======================
-// 🔥 STREAM FIX (IMPORTANT)
-// ======================
+ 
+//   STREAM FIX (IMPORTANT)
+ 
 const streamPath = path.resolve(__dirname, "../stream");
 
 console.log("📁 Serving stream from:", streamPath);
 
 app.use("/stream", express.static(streamPath));
 
-// ======================
+ 
 // DATA STORAGE
-// ======================
+ 
 const filePath = path.join(__dirname, "alerts.json");
 
 let alerts = [];
@@ -45,9 +45,9 @@ if (fs.existsSync(filePath)) {
     alerts = JSON.parse(fs.readFileSync(filePath));
 }
 
-// ======================
-// 🔥 SOCKET CONNECTION
-// ======================
+ 
+//   SOCKET CONNECTION
+ 
 io.on("connection", (socket) => {
     console.log("🟢 Client connected:", socket.id);
 
@@ -59,9 +59,9 @@ io.on("connection", (socket) => {
     });
 });
 
-// ======================
+ 
 // ROUTES
-// ======================
+ 
 
 // POST alert
 app.post("/alert", (req, res) => {
@@ -73,7 +73,7 @@ app.post("/alert", (req, res) => {
 
     console.log("🚨 Stored Alert:", alert);
 
-    // 🔥 REAL-TIME BROADCAST
+    //   REAL-TIME BROADCAST
     io.emit("new_alert", alert);
 
     res.send("Stored");
@@ -84,9 +84,9 @@ app.get("/alerts", (req, res) => {
     res.json(alerts);
 });
 
-// ======================
-// 🔥 DEBUG ROUTE
-// ======================
+ 
+//   DEBUG ROUTE
+ 
 app.get("/test", (req, res) => {
     const file = path.resolve(__dirname, "../stream/frame.jpg");
 
@@ -99,9 +99,9 @@ app.get("/test", (req, res) => {
     }
 });
 
-// ======================
+ 
 // VIDEO SWITCH
-// ======================
+ 
 let currentVideo = "video2.mp4";
 
 app.get("/video", (req, res) => {
@@ -122,9 +122,9 @@ app.post("/video", (req, res) => {
     res.send("Updated");
 });
 
-// ======================
+ 
 // START SERVER
-// ======================
+ 
 server.listen(5000, () => {
     console.log("✅ Backend running at http://localhost:5000");
     console.log("🎥 Stream URL: http://localhost:5000/stream/frame.jpg");
