@@ -7,70 +7,92 @@ const { Server } = require("socket.io");
 
 const app = express();
 
-
-//  CREATE HTTP SERVER + SOCKET.IO
-
+// CREATE HTTP SERVER + SOCKET.IO
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*", // later restrict to your frontend URL
+    origin: "*",
   },
 });
 
-
 // MIDDLEWARE
-
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); // increase limit for image data
 
-
-// STREAM PATH
-
+// ======================
+// STREAM (LOCAL FALLBACK)
+// ======================
 const streamPath = path.resolve(__dirname, "../stream");
 
-console.log(" Serving stream from:", streamPath);
-
-// ⚠️ In cloud, this may not exist → handle safely
 if (fs.existsSync(streamPath)) {
   app.use("/stream", express.static(streamPath));
-} else {
-  console.log(" Stream folder not found (expected in local only)");
 }
 
+// ======================
+// IN-MEMORY FRAME STORE (CLOUD STREAM)
+// ======================
+let latestFrames = {}; // { cam_1: base64, cam_2: base64 }
 
-//  DATA STORAGE
+// RECEIVE FRAME FROM PYTHON
+app.post("/frame", (req, res) => {
+  const { cameraId, image } = req.body;
 
+  if (!cameraId || !image) {
+    return res.status(400).json({ error: "Missing cameraId or image" });
+  }
+
+  latestFrames[cameraId] = image;
+
+  res.json({ status: "frame stored" });
+});
+
+// SERVE FRAME TO FRONTEND
+app.get("/frame/:cameraId", (req, res) => {
+  const cam = req.params.cameraId;
+
+  if (!latestFrames[cam]) {
+    return res.status(404).send("No frame available");
+  }
+
+  const imgBuffer = Buffer.from(latestFrames[cam], "base64");
+
+  res.setHeader("Content-Type", "image/jpeg");
+  res.send(imgBuffer);
+});
+
+// ======================
+// DATA STORAGE
+// ======================
 const filePath = path.join(__dirname, "alerts.json");
 
 let alerts = [];
 
-// Load previous alerts safely
 try {
   if (fs.existsSync(filePath)) {
     alerts = JSON.parse(fs.readFileSync(filePath));
   }
 } catch (err) {
-  console.log(" Error reading alerts.json:", err.message);
+  console.log("Error reading alerts.json:", err.message);
   alerts = [];
 }
 
-
-//  SOCKET CONNECTION
-
+// ======================
+// SOCKET CONNECTION
+// ======================
 io.on("connection", (socket) => {
-  console.log(" Client connected:", socket.id);
+  console.log("Client connected:", socket.id);
 
-  // Send existing alerts
   socket.emit("init_alerts", alerts);
 
   socket.on("disconnect", () => {
-    console.log(" Client disconnected:", socket.id);
+    console.log("Client disconnected:", socket.id);
   });
 });
 
-
+// ======================
 // ROUTES
+// ======================
 
 // POST alert
 app.post("/alert", (req, res) => {
@@ -81,12 +103,9 @@ app.post("/alert", (req, res) => {
   try {
     fs.writeFileSync(filePath, JSON.stringify(alerts, null, 2));
   } catch (err) {
-    console.log(" Failed to write alerts.json:", err.message);
+    console.log("Failed to write alerts.json:", err.message);
   }
 
-  console.log(" Alert received:", alert);
-
-  //  REAL-TIME BROADCAST
   io.emit("new_alert", alert);
 
   res.json({ status: "ok" });
@@ -97,22 +116,14 @@ app.get("/alerts", (req, res) => {
   res.json(alerts);
 });
 
-
-//  DEBUG ROUTE
-
+// DEBUG ROUTE
 app.get("/test", (req, res) => {
-  const file = path.resolve(__dirname, "../stream/frame.jpg");
-
-  if (fs.existsSync(file)) {
-    res.sendFile(file);
-  } else {
-    res.send(" frame.jpg not found (cloud won't have stream)");
-  }
+  res.send("Backend working");
 });
 
-
-// 🎥 VIDEO SWITCH
-
+// ======================
+// VIDEO SWITCH
+// ======================
 let currentVideo = "video2.mp4";
 
 app.get("/video", (req, res) => {
@@ -128,17 +139,15 @@ app.post("/video", (req, res) => {
       currentVideo
     );
   } catch (err) {
-    console.log(" Failed to write video.txt:", err.message);
+    console.log("Failed to write video.txt:", err.message);
   }
-
-  console.log(" Switched video:", currentVideo);
 
   res.json({ status: "updated" });
 });
 
-
-//  START SERVER (IMPORTANT)
-
+// ======================
+// START SERVER
+// ======================
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
