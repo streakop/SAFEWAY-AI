@@ -68,7 +68,7 @@ def send_alert(vehicle_count):
     }
 
     try:
-        res = requests.post("http://localhost:5000/alert", json=alert_data)
+        res = requests.post("https://your-app.up.railway.app/alert", json=alert_data)
         print(f" Alert sent from {CAMERA_ID}!", res.text)
     except:
         print(" Backend not running")
