@@ -29,7 +29,7 @@ app.use(express.json());
  
 const streamPath = path.resolve(__dirname, "../stream");
 
-console.log("📁 Serving stream from:", streamPath);
+console.log(" Serving stream from:", streamPath);
 
 app.use("/stream", express.static(streamPath));
 
@@ -49,13 +49,13 @@ if (fs.existsSync(filePath)) {
 //   SOCKET CONNECTION
  
 io.on("connection", (socket) => {
-    console.log("🟢 Client connected:", socket.id);
+    console.log(" Client connected:", socket.id);
 
     // Send existing alerts when user connects
     socket.emit("init_alerts", alerts);
 
     socket.on("disconnect", () => {
-        console.log("🔴 Client disconnected:", socket.id);
+        console.log(" Client disconnected:", socket.id);
     });
 });
 
@@ -71,7 +71,7 @@ app.post("/alert", (req, res) => {
 
     fs.writeFileSync(filePath, JSON.stringify(alerts, null, 2));
 
-    console.log("🚨 Stored Alert:", alert);
+    console.log(" Stored Alert:", alert);
 
     //   REAL-TIME BROADCAST
     io.emit("new_alert", alert);
@@ -90,12 +90,12 @@ app.get("/alerts", (req, res) => {
 app.get("/test", (req, res) => {
     const file = path.resolve(__dirname, "../stream/frame.jpg");
 
-    console.log("🧪 Testing file:", file);
+    console.log("Testing file:", file);
 
     if (fs.existsSync(file)) {
         res.sendFile(file);
     } else {
-        res.send("❌ frame.jpg not found");
+        res.send("frame.jpg not found");
     }
 });
 
@@ -117,7 +117,7 @@ app.post("/video", (req, res) => {
         currentVideo
     );
 
-    console.log("🎥 Switched video:", currentVideo);
+    console.log(" Switched video:", currentVideo);
 
     res.send("Updated");
 });
@@ -126,7 +126,7 @@ app.post("/video", (req, res) => {
 // START SERVER
  
 server.listen(5000, () => {
-    console.log("✅ Backend running at http://localhost:5000");
-    console.log("🎥 Stream URL: http://localhost:5000/stream/frame.jpg");
-    console.log("🧪 Test URL: http://localhost:5000/test");
+    console.log(" Backend running at http://localhost:5000");
+    console.log(" Stream URL: http://localhost:5000/stream/frame.jpg");
+    console.log(" Test URL: http://localhost:5000/test");
 });
