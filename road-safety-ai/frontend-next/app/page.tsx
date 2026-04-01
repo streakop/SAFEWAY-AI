@@ -16,17 +16,16 @@ type Alert = {
   time: string;
 };
 
-//   USE ENV VARIABLE
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 export default function Home() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    //   INIT SOCKET ONLY ON CLIENT
     const newSocket = io(BACKEND_URL, {
-      transports: ["websocket"]
+      transports: ["websocket"],
     });
 
     setSocket(newSocket);
@@ -45,31 +44,26 @@ export default function Home() {
   }, []);
 
   const total = alerts.length;
-  const high = alerts.filter(a => a.severity === "HIGH").length;
-  const medium = alerts.filter(a => a.severity === "MEDIUM").length;
+  const high = alerts.filter((a) => a.severity === "HIGH").length;
+  const medium = alerts.filter((a) => a.severity === "MEDIUM").length;
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-slate-900 to-slate-800 text-white p-8 relative">
-
-      {/*  LIVE INDICATOR */}
       <div className="absolute top-6 right-8 flex items-center gap-2">
         <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
         <span className="text-green-400 text-sm">LIVE</span>
       </div>
 
-      {/* TITLE */}
       <h1 className="text-3xl font-bold text-cyan-400 mb-6 drop-shadow-[0_0_10px_rgba(34,211,238,0.7)]">
-        🚦 Road Safety AI Dashboard
+        Road Safety AI Dashboard
       </h1>
 
-      {/* STATS */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <Card title="Total Alerts" value={total} />
         <Card title="High Severity" value={high} />
         <Card title="Medium Severity" value={medium} />
       </div>
 
-      {/* MAP + GRAPH */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-4 rounded-2xl shadow-lg">
           <Map alerts={alerts} />
@@ -80,10 +74,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🎥 CAMERA GRID */}
+      {/* CAMERA GRID */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         {cameras.map((cam) => {
-          const camAlerts = alerts.filter(a => a.cameraId === cam);
+          const camAlerts = alerts.filter((a) => a.cameraId === cam);
 
           return (
             <div
@@ -93,12 +87,12 @@ export default function Home() {
               } p-3 rounded-2xl shadow-lg transition hover:scale-[1.02]`}
             >
               <div className="flex justify-between items-center mb-2">
-                <p className="text-sm text-cyan-400"> {cam}</p>
-                <p className="text-xs text-gray-400"> {camAlerts.length}</p>
+                <p className="text-sm text-cyan-400">{cam}</p>
+                <p className="text-xs text-gray-400">{camAlerts.length}</p>
               </div>
 
               <img
-                src={`${BACKEND_URL}/stream/${cam}.jpg?${Date.now()}`}
+                src={`${BACKEND_URL}/frame/${cam}?${Date.now()}`}
                 className="rounded-lg w-full transition-opacity duration-150"
               />
             </div>
@@ -114,10 +108,10 @@ export default function Home() {
             className="bg-white/5 backdrop-blur-lg border border-white/10 p-4 rounded-2xl flex justify-between items-center hover:scale-[1.01] transition"
           >
             <div>
-              <p className="font-semibold text-lg"> {alert.location}</p>
+              <p className="font-semibold text-lg">{alert.location}</p>
 
               <p className="text-xs text-cyan-300">
-                 {alert.cameraId || "cam_1"}
+                {alert.cameraId || "cam_1"}
               </p>
 
               <p className="text-sm text-gray-400">
